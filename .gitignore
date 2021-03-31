@@ -1,3 +1,5 @@
+
+# DB & Cache
 db.sqlite3
 __pycache__/
 
@@ -37,5 +39,4 @@ venv.bak/
 !.vscode/extensions.json 
 .history
 
-db.sqlite3
 .vscode/settings.json
