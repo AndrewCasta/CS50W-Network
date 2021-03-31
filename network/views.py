@@ -1,14 +1,31 @@
+import json
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
 from django.db import IntegrityError
-from django.http import HttpResponse, HttpResponseRedirect
+from network.models import User, Post, Follow, Like
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
 from django.urls import reverse
-
-from .models import User
+from django.views.decorators.csrf import csrf_exempt
 
 
 def index(request):
     return render(request, "network/index.html")
+
+
+@login_required
+@csrf_exempt
+def add_post(request):
+    if request.method == "POST":
+        post_body = json.loads(request.body)["post"]
+        user = request.user
+
+        post = Post(post=post_body, user=user)
+        post.save()
+
+        return JsonResponse({"message": "post added successfully"}, status=200)
+
+    return HttpResponseRedirect(reverse("index"))
 
 
 def login_view(request):
@@ -24,9 +41,11 @@ def login_view(request):
             login(request, user)
             return HttpResponseRedirect(reverse("index"))
         else:
-            return render(request, "network/login.html", {
-                "message": "Invalid username and/or password."
-            })
+            return render(
+                request,
+                "network/login.html",
+                {"message": "Invalid username and/or password."},
+            )
     else:
         return render(request, "network/login.html")
 
@@ -45,18 +64,18 @@ def register(request):
         password = request.POST["password"]
         confirmation = request.POST["confirmation"]
         if password != confirmation:
-            return render(request, "network/register.html", {
-                "message": "Passwords must match."
-            })
+            return render(
+                request, "network/register.html", {"message": "Passwords must match."}
+            )
 
         # Attempt to create new user
         try:
             user = User.objects.create_user(username, email, password)
             user.save()
         except IntegrityError:
-            return render(request, "network/register.html", {
-                "message": "Username already taken."
-            })
+            return render(
+                request, "network/register.html", {"message": "Username already taken."}
+            )
         login(request, user)
         return HttpResponseRedirect(reverse("index"))
     else:
