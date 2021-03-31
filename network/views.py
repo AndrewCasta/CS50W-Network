@@ -1,6 +1,7 @@
 import json
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
+from django.core import serializers
 from django.db import IntegrityError
 from network.models import User, Post, Follow, Like
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
@@ -24,6 +25,17 @@ def add_post(request):
         post.save()
 
         return JsonResponse({"message": "post added successfully"}, status=200)
+
+    return HttpResponseRedirect(reverse("index"))
+
+
+@login_required
+@csrf_exempt
+def posts(request):
+    if request.method == "GET":
+
+        posts = serializers.serialize("json", Post.objects.all())
+        return HttpResponse(posts)
 
     return HttpResponseRedirect(reverse("index"))
 
