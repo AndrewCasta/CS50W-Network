@@ -34,13 +34,14 @@ def add_post(request):
 def posts(request):
     if request.method == "GET":
 
-        posts = Post.objects.all()
+        posts = Post.objects.all().order_by("-datetime")
 
         return JsonResponse(
             [
                 {
                     "id": post.id,
                     "user": post.user.username,
+                    "post": post.post,
                     "datetime": post.datetime.strftime("%b %w, %Y - %I:%M%p"),
                     "likes": post.likes.count(),
                 }

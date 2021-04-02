@@ -2,10 +2,18 @@
 New post
 */
 
-.new-post {
+.new-post,
+.posts {
   padding: 1.5rem;
 }
 
 .new-post button {
   margin-top: 0.1rem;
+}
+
+.post {
+  padding: 1rem;
+  border: 1px lightgray solid;
+  border-radius: 5px;
+  margin-bottom: 1rem;
 }
