@@ -34,8 +34,20 @@ def add_post(request):
 def posts(request):
     if request.method == "GET":
 
-        posts = serializers.serialize("json", Post.objects.all())
-        return HttpResponse(posts)
+        posts = Post.objects.all()
+
+        return JsonResponse(
+            [
+                {
+                    "id": post.id,
+                    "user": post.user.username,
+                    "datetime": post.datetime.strftime("%b %w, %Y - %I:%M%p"),
+                    "likes": post.likes.count(),
+                }
+                for post in posts
+            ],
+            safe=False,
+        )
 
     return HttpResponseRedirect(reverse("index"))
 
