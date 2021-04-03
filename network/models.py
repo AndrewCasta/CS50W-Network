@@ -30,7 +30,10 @@ class Follow(models.Model):
     """
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="follows")
-    follow = models.ForeignKey(User, on_delete=models.CASCADE)
+    follow = models.ForeignKey(User, on_delete=models.CASCADE, related_name="follower")
+
+    def __str__(self):
+        return f"{self.user} follows {self.follow}"
 
 
 class Like(models.Model):

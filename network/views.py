@@ -53,6 +53,57 @@ def posts(request):
     return HttpResponseRedirect(reverse("index"))
 
 
+def profile(request, user_id):
+    if request.method == "GET":
+        user = User.objects.get(pk=user_id)
+        posts = user.posts.all().order_by("-datetime")
+
+        return JsonResponse(
+            {
+                "user": user.username,
+                "followers": user.follower.count(),
+                "following": user.follows.count(),
+                "posts": [
+                    {
+                        "id": post.id,
+                        "user": post.user.username,
+                        "post": post.post,
+                        "datetime": post.datetime.strftime("%b %w, %Y - %I:%M%p"),
+                        "likes": post.likes.count(),
+                    }
+                    for post in posts
+                ],
+            }
+        )
+
+
+@login_required
+@csrf_exempt
+def follow(request, follow_username):
+    """
+    GET: This view will check if the current authenticated user is following
+    the passed in user.
+    POST: Toggle the following of the the passed in user
+    """
+    try:
+        follow = User.objects.get(username=follow_username)
+        follow_check = request.user.follows.filter(follow__exact=follow)
+    except User.DoesNotExist:
+        return JsonResponse({"Error": "Username cannot be found"})
+
+    if request.method == "GET":
+        return JsonResponse({"following": bool(follow_check)})
+
+    if request.method == "POST":
+        if follow_check:
+            follow_check.delete()
+            message = f"{request.user.username} stopped following {follow.username}"
+        else:
+            Follow(user=request.user, follow=follow).save()
+            message = f"{request.user.username} now follows {follow.username}"
+        return JsonResponse({"message": message})
+
+
 def login_view(request):
     if request.method == "POST":
 
