@@ -53,16 +53,25 @@ def posts(request):
     return HttpResponseRedirect(reverse("index"))
 
 
-def profile(request, user_id):
+def profile(request, username):
     if request.method == "GET":
-        user = User.objects.get(pk=user_id)
+        user = User.objects.get(username=username)
         posts = user.posts.all().order_by("-datetime")
+
+        is_self = request.user.username == username
+        is_following = bool(
+            request.user.follows.filter(
+                follow__exact=User.objects.get(username=username)
+            )
+        )
 
         return JsonResponse(
             {
                 "user": user.username,
-                "followers": user.follower.count(),
-                "following": user.follows.count(),
+                "followers_count": user.follower.count(),
+                "following_count": user.follows.count(),
+                "is_self": is_self,
+                "is_following": is_following,
                 "posts": [
                     {
                         "id": post.id,
