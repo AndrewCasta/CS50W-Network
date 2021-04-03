@@ -1,18 +1,27 @@
+// ========
+// Add post
+// ========
+
 const addPostButton = document.querySelector('#addPost');
 
 if (addPostButton) {
-  addPostButton.addEventListener('click', e => {
+  addPostButton.addEventListener('click', async e => {
     e.preventDefault();
     const post = document.querySelector('#post');
-    fetch(`/add_post`, {
+    await fetch(`/add_post`, {
       method: 'POST',
       body: JSON.stringify({
         post: post.value,
       }),
     });
     post.value = '';
+    loadPosts();
   });
 }
+
+// =========
+// All posts
+// =========
 
 const postsDOM = document.querySelector('.posts');
 loadPosts();
