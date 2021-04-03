@@ -1,3 +1,7 @@
+// Get the current user's id
+const userID = JSON.parse(document.getElementById('user_id').textContent);
+console.log(userID);
+
 // ========
 // Add post
 // ========
@@ -45,4 +49,16 @@ function renderPosts(posts) {
     })
     .join('');
   postsDOM.innerHTML = postsHtml;
+}
+
+// ============
+// Profile Page
+// ============
+
+async function toggleFollow() {
+  const reponse = await fetch('/follow/user2', {
+    method: 'POST',
+  });
+  const data = await reponse.json();
+  console.log(data);
 }

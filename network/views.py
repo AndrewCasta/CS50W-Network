@@ -29,7 +29,6 @@ def add_post(request):
     return HttpResponseRedirect(reverse("index"))
 
 
-@login_required
 @csrf_exempt
 def posts(request):
     if request.method == "GET":
@@ -58,12 +57,16 @@ def profile(request, username):
         user = User.objects.get(username=username)
         posts = user.posts.all().order_by("-datetime")
 
-        is_self = request.user.username == username
-        is_following = bool(
-            request.user.follows.filter(
-                follow__exact=User.objects.get(username=username)
+        if request.user.is_authenticated:
+            is_self = request.user.username == username
+            is_following = bool(
+                request.user.follows.filter(
+                    follow__exact=User.objects.get(username=username)
+                )
             )
-        )
+        else:
+            is_self = ""
+            is_following = ""
 
         return JsonResponse(
             {
