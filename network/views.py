@@ -33,7 +33,29 @@ def add_post(request):
 def posts(request):
     if request.method == "GET":
 
-        posts = Post.objects.all().order_by("-datetime")
+        username = request.GET["username"]
+        following = request.GET["following"]
+
+        if following:
+            user_following = User.objects.get(username=following)
+            following_users = [
+                user.follow.username for user in user_following.follows.all()
+            ]
+
+        if username and following:
+            posts = (
+                Post.objects.filter(user__username=username)
+                .filter(user__username__in=following_users)
+                .order_by("-datetime")
+            )
+        elif username:
+            posts = Post.objects.filter(user__username=username).order_by("-datetime")
+        elif following:
+            posts = Post.objects.filter(user__username__in=following_users).order_by(
+                "-datetime"
+            )
+        else:
+            posts = Post.objects.all().order_by("-datetime")
 
         return JsonResponse(
             [
@@ -75,16 +97,6 @@ def profile(request, username):
                 "following_count": user.follows.count(),
                 "is_self": is_self,
                 "is_following": is_following,
-                "posts": [
-                    {
-                        "id": post.id,
-                        "username": post.user.username,
-                        "post": post.post,
-                        "datetime": post.datetime.strftime("%b %w, %Y - %I:%M%p"),
-                        "likes": post.likes.count(),
-                    }
-                    for post in posts
-                ],
             }
         )
 

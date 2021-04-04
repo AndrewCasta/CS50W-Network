@@ -23,7 +23,8 @@ changeDOM(allPostsDOM);
 // All-posts
 // =========
 
-allPostsNav.addEventListener('click', () => {
+allPostsNav.addEventListener('click', e => {
+  e.preventDefault();
   loadPosts(postsDOM);
   changeDOM(allPostsDOM, profileDOM);
   const addPostButton = document.querySelector('#addPost');
@@ -49,15 +50,37 @@ allPostsNav.addEventListener('click', () => {
 // ============
 
 profileNav.addEventListener('click', e => {
-  username = e.target.dataset.username;
+  e.preventDefault();
+  username = e.currentTarget.dataset.username;
+  loadProfilePage(username);
+});
+
+async function loadProfilePage(username) {
+  console.log(username);
   // fetch the profile data
+  const response = await fetch(`/profile/${username}`);
+  const data = await response.json();
+  console.log(data);
+
+  const {
+    followers_count: followersCount,
+    following_count: followingCount,
+  } = data;
 
   // fill in the basic user profile info
+  document.querySelector('#profile-username').innerHTML = username;
+  document.querySelector('#profile-followers').innerHTML = followersCount;
+  document.querySelector('#profile-following').innerHTML = followingCount;
+
+  // check and update follow button
+  ('#profile-follow');
 
   // add their posts (fetch helper)
+  loadPosts(profilPostsDOM, username);
 
   // Swap the DOM
-});
+  changeDOM(profileDOM);
+}
 
 async function toggleFollow() {
   const reponse = await fetch('/follow/user2', {

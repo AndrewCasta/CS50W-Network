@@ -3,7 +3,8 @@ New post
 */
 
 .new-post,
-.posts {
+.posts,
+.profile {
   padding: 1.5rem;
 }
 
