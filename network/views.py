@@ -39,7 +39,7 @@ def posts(request):
             [
                 {
                     "id": post.id,
-                    "user": post.user.username,
+                    "username": post.user.username,
                     "post": post.post,
                     "datetime": post.datetime.strftime("%b %w, %Y - %I:%M%p"),
                     "likes": post.likes.count(),
@@ -70,7 +70,7 @@ def profile(request, username):
 
         return JsonResponse(
             {
-                "user": user.username,
+                "username": user.username,
                 "followers_count": user.follower.count(),
                 "following_count": user.follows.count(),
                 "is_self": is_self,
@@ -78,7 +78,7 @@ def profile(request, username):
                 "posts": [
                     {
                         "id": post.id,
-                        "user": post.user.username,
+                        "username": post.user.username,
                         "post": post.post,
                         "datetime": post.datetime.strftime("%b %w, %Y - %I:%M%p"),
                         "likes": post.likes.count(),
