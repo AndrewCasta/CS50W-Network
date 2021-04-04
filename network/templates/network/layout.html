@@ -37,7 +37,11 @@
           </li>
           {% if user.is_authenticated %}
           <li class="nav-item">
-            <a class="nav-link" id="following-nav" href="{% url 'index' %}"
+            <a
+              class="nav-link"
+              id="following-nav"
+              data-username="{{ user.username }}"
+              href="{% url 'index' %}"
               >Following</a
             >
           </li>

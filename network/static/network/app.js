@@ -5,10 +5,11 @@ console.log(userID);
 // DOM sections
 const allPostsDOM = document.querySelector('#all-posts');
 const profileDOM = document.querySelector('#profile');
+const followingeDOM = document.querySelector('#following');
 const postsDOM = document.querySelector('.posts');
 const profilPostsDOM = document.querySelector('#profile-posts');
 
-const listDOMs = [allPostsDOM, profileDOM];
+const listDOMs = [allPostsDOM, profileDOM, followingeDOM];
 
 // Nav Buttons
 const allPostsNav = document.querySelector('#all-posts-nav');
@@ -44,6 +45,25 @@ allPostsNav.addEventListener('click', e => {
     });
   }
 });
+
+// ============
+// Following
+// ============
+
+if (followingNav) {
+  followingNav.addEventListener('click', e => {
+    e.preventDefault();
+    loadFollowingPage();
+  });
+}
+
+function loadFollowingPage() {
+  // fetch posts the user is following
+  const username = followingNav.dataset.username;
+  loadPosts(followingeDOM, undefined, username);
+
+  changeDOM(followingeDOM);
+}
 
 // ============
 // Profile Page

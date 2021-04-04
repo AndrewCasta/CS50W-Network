@@ -1,15 +1,12 @@
-/* 
-New post
-*/
-
 .new-post,
 .posts,
-.profile {
+.profile,
+.following {
   padding: 1.5rem;
 }
 
 #profile-posts {
-  margin-top: 1.5rem;
+  margin-top: 2.5rem;
 }
 #profile-username {
   text-transform: capitalize;
