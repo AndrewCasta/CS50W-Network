@@ -49,31 +49,48 @@ allPostsNav.addEventListener('click', e => {
 // Profile Page
 // ============
 
-profileNav.addEventListener('click', e => {
-  e.preventDefault();
-  username = e.currentTarget.dataset.username;
-  loadProfilePage(username);
+if (profileNav) {
+  profileNav.addEventListener('click', e => {
+    e.preventDefault();
+    loadProfilePage(e.currentTarget.dataset.username);
+  });
+}
+
+// set-up follow button
+const followButton = $('#profile-follow');
+followButton.addEventListener('click', e => {
+  clickHandlerFollowButton(e.currentTarget.dataset.username);
 });
 
 async function loadProfilePage(username) {
-  console.log(username);
   // fetch the profile data
   const response = await fetch(`/profile/${username}`);
   const data = await response.json();
-  console.log(data);
 
-  const {
+  let {
     followers_count: followersCount,
     following_count: followingCount,
+    is_self: isSelf,
+    is_following: isFollowing,
   } = data;
 
   // fill in the basic user profile info
+  document.querySelector('#profile-username').innerHTML = username;
   document.querySelector('#profile-username').innerHTML = username;
   document.querySelector('#profile-followers').innerHTML = followersCount;
   document.querySelector('#profile-following').innerHTML = followingCount;
 
   // check and update follow button
-  ('#profile-follow');
+  if (followButton) {
+    followButton.dataset.username = username;
+    isSelf
+      ? (followButton.style.display = 'none')
+      : (followButton.style.display = 'block');
+
+    isFollowing
+      ? (followButton.innerHTML = 'Unfollow')
+      : (followButton.innerHTML = 'Follow');
+  }
 
   // add their posts (fetch helper)
   loadPosts(profilPostsDOM, username);
@@ -82,12 +99,15 @@ async function loadProfilePage(username) {
   changeDOM(profileDOM);
 }
 
-async function toggleFollow() {
-  const reponse = await fetch('/follow/user2', {
+async function clickHandlerFollowButton(username) {
+  const reponse = await fetch(`/follow/${username}`, {
     method: 'POST',
   });
   const data = await reponse.json();
-  console.log(data);
+  data.following
+    ? (followButton.innerHTML = 'Unfollow')
+    : (followButton.innerHTML = 'Follow');
+  document.querySelector('#profile-followers').innerHTML = data.followers_count;
 }
 
 // ============
@@ -120,7 +140,7 @@ async function loadPosts(targetDOM, username = '', following = '') {
     .map(postItem => {
       const { username, post, datetime, likes } = postItem;
       return `<div class="post">
-            <h4>${username}</h4>
+            <h4 class="username-click" data-username="${username}">${username}</h4>
             <p>${post}</p>
             <p>${datetime}</p>
             <p>Likes: ${likes}</p>
@@ -128,4 +148,18 @@ async function loadPosts(targetDOM, username = '', following = '') {
     })
     .join('');
   targetDOM.innerHTML = postsHtml;
+  document.querySelectorAll('.username-click').forEach(clickHandle => {
+    clickHandle.addEventListener('click', e => {
+      username = e.currentTarget.dataset.username;
+      loadProfilePage(username);
+    });
+  });
+}
+
+function $(selector) {
+  try {
+    return document.querySelector(selector);
+  } catch (error) {
+    console.log(`Cannot find ${selector}`);
+  }
 }

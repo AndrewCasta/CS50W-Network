@@ -8,8 +8,19 @@ New post
   padding: 1.5rem;
 }
 
+#profile-posts {
+  margin-top: 1.5rem;
+}
+#profile-username {
+  text-transform: capitalize;
+}
+
 .new-post button {
   margin-top: 0.1rem;
+}
+
+.username-click {
+  cursor: pointer;
 }
 
 .post {

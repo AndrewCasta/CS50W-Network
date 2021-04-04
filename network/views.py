@@ -71,8 +71,6 @@ def posts(request):
             safe=False,
         )
 
-    return HttpResponseRedirect(reverse("index"))
-
 
 def profile(request, username):
     if request.method == "GET":
@@ -125,7 +123,15 @@ def follow(request, follow_username):
         else:
             Follow(user=request.user, follow=follow).save()
             message = f"{request.user.username} now follows {follow.username}"
-        return JsonResponse({"message": message})
+
+        follow_check = request.user.follows.filter(follow__exact=follow)
+        return JsonResponse(
+            {
+                "message": message,
+                "following": bool(follow_check),
+                "followers_count": follow.follower.count(),
+            }
+        )
 
 
 def login_view(request):
