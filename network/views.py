@@ -98,6 +98,7 @@ def posts(request):
                         "post": post.post,
                         "datetime": post.datetime.strftime("%b %w, %Y - %I:%M%p"),
                         "likes": post.likes.count(),
+                        "user_liked": bool(post.likes.filter(user=request.user)),
                     }
                     for post in posts_page
                 ],

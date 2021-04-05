@@ -122,7 +122,7 @@ async function loadProfilePage(username) {
       : (followButton.innerHTML = 'Follow');
   }
 
-  // add their posts (fetch helper)
+  // add their posts
   loadPosts(profilPostsDOM, profilePostsPageNav, username);
 
   // Swap the DOM
@@ -174,13 +174,24 @@ async function loadPosts(
   const data = await response.json();
   const postsHtml = data.posts
     .map(postItem => {
-      const { id, username, post, datetime, likes } = postItem;
+      const {
+        id,
+        username,
+        post,
+        datetime,
+        likes,
+        user_liked: liked,
+      } = postItem;
       const editLink = `<a href="" data-postid="${id}" class="edit-link">edit</a>`;
       return `<div class="post">
             <h4 class="username-click" data-username="${username}">${username}</h4>
             <p class="post-body">${post}</p>
             <p>${datetime}</p>
-            <p>Likes: ${likes}</p>
+            <span data-postid="${id}" class="like-button ${
+        liked ? 'liked' : 'not-liked'
+      }">${
+        liked ? '&#x2764' : '&#x1f494'
+      } <span class="like-count">${likes}</span></span>
             ${username === authUsername ? editLink : ''}
             </div>`;
     })
@@ -195,13 +206,27 @@ async function loadPosts(
     });
   });
 
+  // like button update liked status for user & add handler
+  document.querySelectorAll('.like-button').forEach(likeButton => {
+    likeButton.addEventListener('click', e => {
+      let liked = e.currentTarget.classList.contains('liked');
+      let likeCounter = parseInt(
+        e.currentTarget.querySelector('.like-count').textContent
+      );
+      if (liked) likeCounter += 1;
+      if (!liked && liked > 0) likeCounter -= 1;
+      console.log(likeCounter);
+
+      // toggle server side
+      // update dom element
+    });
+  });
+
   // Add event handlers for edit buttons
   targetPostsDOM.querySelectorAll('.edit-link').forEach(clickHandle => {
     clickHandle.addEventListener('click', e => {
       e.preventDefault();
       const postId = e.currentTarget.dataset.postid;
-      console.log(e.currentTarget.dataset);
-      console.log(postId);
       const postDiv = e.currentTarget.parentElement.querySelector('.post-body');
       const editButton = e.currentTarget;
 
@@ -261,7 +286,7 @@ async function loadPosts(
   `;
   targetPaginationDOM.innerHTML = paginatorHTML;
 
-  // add event handles
+  // add pagination event handles
   const pageItems = targetPaginationDOM.querySelectorAll('.page-item');
 
   for (const item of pageItems) {
