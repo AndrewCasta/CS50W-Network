@@ -30,6 +30,27 @@ def add_post(request):
     return HttpResponseRedirect(reverse("index"))
 
 
+@login_required
+@csrf_exempt
+def edit_post(request, post_id):
+    if request.method == "PUT":
+
+        post = Post.objects.get(id=post_id)
+        post_body = json.loads(request.body)["post"]
+
+        if request.user == post.user:
+            post.post = post_body
+            post.save()
+
+            return JsonResponse({"message": "post updated successfully"}, status=200)
+
+        else:
+            return JsonResponse(
+                {"message": "post not updated, cannot edit other users posts"},
+                status=403,
+            )
+
+
 @csrf_exempt
 def posts(request):
     if request.method == "GET":

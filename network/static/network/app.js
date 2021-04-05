@@ -174,12 +174,14 @@ async function loadPosts(
   const data = await response.json();
   const postsHtml = data.posts
     .map(postItem => {
-      const { username, post, datetime, likes } = postItem;
+      const { id, username, post, datetime, likes } = postItem;
+      const editLink = `<a href="" data-postid="${id}" class="edit-link">edit</a>`;
       return `<div class="post">
             <h4 class="username-click" data-username="${username}">${username}</h4>
-            <p>${post}</p>
+            <p class="post-body">${post}</p>
             <p>${datetime}</p>
             <p>Likes: ${likes}</p>
+            ${username === authUsername ? editLink : ''}
             </div>`;
     })
     .join('');
@@ -190,6 +192,45 @@ async function loadPosts(
     clickHandle.addEventListener('click', e => {
       username = e.currentTarget.dataset.username;
       loadProfilePage(username);
+    });
+  });
+
+  // Add event handlers for edit buttons
+  targetPostsDOM.querySelectorAll('.edit-link').forEach(clickHandle => {
+    clickHandle.addEventListener('click', e => {
+      e.preventDefault();
+      const postId = e.currentTarget.dataset.postid;
+      console.log(e.currentTarget.dataset);
+      console.log(postId);
+      const postDiv = e.currentTarget.parentElement.querySelector('.post-body');
+      const editButton = e.currentTarget;
+
+      editButton.style.display = 'none';
+      postDiv.style.display = 'none';
+
+      const editBox = document.createElement('textarea');
+      const editBoxSave = document.createElement('button');
+      editBoxSave.textContent = 'Save';
+      editBoxSave.classList.add('btn', 'btn-primary');
+      editBox.textContent = postDiv.textContent;
+      postDiv.insertAdjacentElement('afterend', editBox);
+      editBox.insertAdjacentElement('afterend', editBoxSave);
+
+      editBoxSave.addEventListener('click', () => {
+        const newPostBody = editBox.value;
+        postDiv.textContent = newPostBody;
+        postDiv.style.display = 'block';
+        editButton.style.display = 'block';
+        editBox.remove();
+        editBoxSave.remove();
+
+        fetch(`/edit_post/${postId}`, {
+          method: 'PUT',
+          body: JSON.stringify({
+            post: newPostBody,
+          }),
+        });
+      });
     });
   });
 
@@ -245,42 +286,6 @@ async function loadPosts(
     loadPosts(targetPostsDOM, targetPaginationDOM, username, following, page);
   }
 }
-
-// /**
-//  * Pagination builder
-//  * @param {*} navDOM
-//  * @param {*} paginationObj
-//  */
-// function paginationBuilder(navDOM, paginationObj) {
-//   const {
-//     page,
-//     page_total: pageTotal,
-//     has_next: hasNext,
-//     has_previous: hasPrevious,
-//   } = paginationObj;
-
-//   let pageButtonsHTML = '';
-//   for (let i = 1; i <= pageTotal; i++) {
-//     pageButtonsHTML += `<li class="page-item ${
-//       i == page ? 'active' : ''
-//     }"><a class="page-link">${i}</a></li>`;
-//   }
-
-//   const paginatorHTML =
-//     `
-//   <li class="page-item ${
-//     hasPrevious ? '' : 'disabled'
-//   }"><a class="page-link">Previous</a></li>` +
-//     pageButtonsHTML +
-//     `<li class="page-item ${
-//       hasNext ? '' : 'disabled'
-//     }"><a class="page-link">Next</a></li>
-//   `;
-//   navDOM.innerHTML = paginatorHTML;
-
-//   // add event handles
-//   const previousPage = () => {}
-// }
 
 function $(selector) {
   try {
