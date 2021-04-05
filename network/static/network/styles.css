@@ -1,0 +1,28 @@
+.new-post,
+.posts,
+.profile,
+.following {
+  padding: 1.5rem;
+}
+
+#profile-posts {
+  margin-top: 2.5rem;
+}
+#profile-username {
+  text-transform: capitalize;
+}
+
+.new-post button {
+  margin-top: 0.1rem;
+}
+
+.username-click {
+  cursor: pointer;
+}
+
+.post {
+  padding: 1rem;
+  border: 1px lightgray solid;
+  border-radius: 5px;
+  margin-bottom: 1rem;
+}

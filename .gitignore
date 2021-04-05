@@ -1,4 +1,7 @@
+
+# DB & Cache
 db.sqlite3
+__pycache__/
 
 # Distribution / packaging 
 .Python build/ 
@@ -36,5 +39,4 @@ venv.bak/
 !.vscode/extensions.json 
 .history
 
-db.sqlite3
 .vscode/settings.json
