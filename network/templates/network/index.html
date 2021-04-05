@@ -26,10 +26,40 @@
 
   <!-- All Posts -->
   <div class="posts"></div>
+  <!-- paginator -->
+  <nav>
+    <ul id="posts-page-nav" class="pagination justify-content-center">
+      <li class="page-item disabled">
+        <a class="page-link">Previous</a>
+      </li>
+      <li class="page-item active"><a class="page-link">1</a></li>
+      <li class="page-item"><a class="page-link">2</a></li>
+      <li class="page-item"><a class="page-link">3</a></li>
+      <li class="page-item">
+        <a class="page-link">Next</a>
+      </li>
+    </ul>
+  </nav>
 </div>
 
 <!-- Following -->
-<div id="following" class="following"></div>
+<div id="following-posts">
+  <div id="following" class="following"></div>
+  <!-- paginator -->
+  <nav>
+    <ul id="following-page-nav" class="pagination justify-content-center">
+      <li class="page-item disabled">
+        <a class="page-link">Previous</a>
+      </li>
+      <li class="page-item active"><a class="page-link">1</a></li>
+      <li class="page-item"><a class="page-link">2</a></li>
+      <li class="page-item"><a class="page-link">3</a></li>
+      <li class="page-item">
+        <a class="page-link">Next</a>
+      </li>
+    </ul>
+  </nav>
+</div>
 
 <!-- Profile Page -->
 <div id="profile" class="profile" data-username="">
@@ -40,6 +70,20 @@
   <h4>Followers: <span id="profile-followers"></span></h4>
   <h4>Following: <span id="profile-following"></span></h4>
   <div id="profile-posts"></div>
+  <!-- paginator -->
+  <nav>
+    <ul id="profile-page-nav" class="pagination justify-content-center">
+      <li class="page-item disabled">
+        <a class="page-link">Previous</a>
+      </li>
+      <li class="page-item active"><a class="page-link">1</a></li>
+      <li class="page-item"><a class="page-link">2</a></li>
+      <li class="page-item"><a class="page-link">3</a></li>
+      <li class="page-item">
+        <a class="page-link">Next</a>
+      </li>
+    </ul>
+  </nav>
 </div>
 
 {% endblock %}

@@ -1,11 +1,13 @@
 // Get the current user's id
-const userID = JSON.parse(document.getElementById('user_id').textContent);
-console.log(userID);
+const authUsername = JSON.parse(
+  document.getElementById('username').textContent
+);
+console.log(authUsername);
 
 // DOM sections
 const allPostsDOM = document.querySelector('#all-posts');
 const profileDOM = document.querySelector('#profile');
-const followingeDOM = document.querySelector('#following');
+const followingeDOM = document.querySelector('#following-posts');
 const postsDOM = document.querySelector('.posts');
 const profilPostsDOM = document.querySelector('#profile-posts');
 
@@ -16,35 +18,41 @@ const allPostsNav = document.querySelector('#all-posts-nav');
 const profileNav = document.querySelector('#profile-nav');
 const followingNav = document.querySelector('#following-nav');
 
+// Paginator navs
+const allPostsPageNav = document.querySelector('#posts-page-nav');
+const followingPostsPageNav = document.querySelector('#following-page-nav');
+const profilePostsPageNav = document.querySelector('#profile-page-nav');
+
 // Initial page state
-loadPosts(postsDOM);
+loadPosts(postsDOM, allPostsPageNav);
 changeDOM(allPostsDOM);
 
 // =========
 // All-posts
 // =========
 
+const addPostButton = document.querySelector('#addPost');
+
 allPostsNav.addEventListener('click', e => {
   e.preventDefault();
-  loadPosts(postsDOM);
+  loadPosts(postsDOM, allPostsPageNav);
   changeDOM(allPostsDOM, profileDOM);
-  const addPostButton = document.querySelector('#addPost');
-
-  if (addPostButton) {
-    addPostButton.addEventListener('click', async e => {
-      e.preventDefault();
-      const post = document.querySelector('#post');
-      await fetch(`/add_post`, {
-        method: 'POST',
-        body: JSON.stringify({
-          post: post.value,
-        }),
-      });
-      post.value = '';
-      loadPosts();
-    });
-  }
 });
+
+if (addPostButton) {
+  addPostButton.addEventListener('click', async e => {
+    e.preventDefault();
+    const post = document.querySelector('#post');
+    await fetch(`/add_post`, {
+      method: 'POST',
+      body: JSON.stringify({
+        post: post.value,
+      }),
+    });
+    post.value = '';
+    loadPosts(postsDOM, allPostsPageNav);
+  });
+}
 
 // ============
 // Following
@@ -58,9 +66,8 @@ if (followingNav) {
 }
 
 function loadFollowingPage() {
-  // fetch posts the user is following
   const username = followingNav.dataset.username;
-  loadPosts(followingeDOM, undefined, username);
+  loadPosts(followingeDOM, followingPostsPageNav, undefined, username);
 
   changeDOM(followingeDOM);
 }
@@ -78,9 +85,11 @@ if (profileNav) {
 
 // set-up follow button
 const followButton = $('#profile-follow');
-followButton.addEventListener('click', e => {
-  clickHandlerFollowButton(e.currentTarget.dataset.username);
-});
+if (followButton) {
+  followButton.addEventListener('click', e => {
+    clickHandlerFollowButton(e.currentTarget.dataset.username);
+  });
+}
 
 async function loadProfilePage(username) {
   // fetch the profile data
@@ -113,7 +122,7 @@ async function loadProfilePage(username) {
   }
 
   // add their posts (fetch helper)
-  loadPosts(profilPostsDOM, username);
+  loadPosts(profilPostsDOM, profilePostsPageNav, username);
 
   // Swap the DOM
   changeDOM(profileDOM);
@@ -151,12 +160,18 @@ function changeDOM(onDOM) {
  * @param {*} username - optional arg to load specific user's posts
  * @param {*} following - optional arg to load specific posts user is following
  */
-async function loadPosts(targetDOM, username = '', following = '') {
+async function loadPosts(
+  targetPostsDOM,
+  targetPaginationDOM,
+  username = '',
+  following = '',
+  page = 1
+) {
   const response = await fetch(
-    `/posts?username=${username}&following=${following}`
+    `/posts?username=${username}&following=${following}&page=${page}`
   );
-  const posts = await response.json();
-  const postsHtml = posts
+  const data = await response.json();
+  const postsHtml = data.posts
     .map(postItem => {
       const { username, post, datetime, likes } = postItem;
       return `<div class="post">
@@ -167,14 +182,104 @@ async function loadPosts(targetDOM, username = '', following = '') {
             </div>`;
     })
     .join('');
-  targetDOM.innerHTML = postsHtml;
+  targetPostsDOM.innerHTML = postsHtml;
+
+  // Add event handlers to all usernames for profile nav
   document.querySelectorAll('.username-click').forEach(clickHandle => {
     clickHandle.addEventListener('click', e => {
       username = e.currentTarget.dataset.username;
       loadProfilePage(username);
     });
   });
+
+  // Build the pagination
+  page = parseInt(data.pagination.page);
+  const {
+    page_total: pageTotal,
+    has_next: hasNext,
+    has_previous: hasPrevious,
+  } = data.pagination;
+
+  let pageButtonsHTML = '';
+  for (let i = 1; i <= pageTotal; i++) {
+    pageButtonsHTML += `<li data-pagination="${i}" class="page-item ${
+      i == page ? 'active' : ''
+    }"><a class="page-link">${i}</a></li>`;
+  }
+
+  const paginatorHTML =
+    `
+  <li data-pagination="previous" class="page-item ${
+    hasPrevious ? '' : 'disabled'
+  }"><a class="page-link">Previous</a></li>` +
+    pageButtonsHTML +
+    `<li data-pagination="next" class="page-item ${
+      hasNext ? '' : 'disabled'
+    }"><a class="page-link">Next</a></li>
+  `;
+  targetPaginationDOM.innerHTML = paginatorHTML;
+
+  // add event handles
+  const pageItems = targetPaginationDOM.querySelectorAll('.page-item');
+
+  for (const item of pageItems) {
+    item.addEventListener('click', () => {
+      if (item.dataset.pagination === 'previous') previousPage();
+      if (item.dataset.pagination === 'next') nextPage();
+      if (parseInt(item.dataset.pagination)) linkPage(item.dataset.pagination);
+    });
+  }
+
+  function previousPage() {
+    page--;
+    if (page < 1) page = 1;
+    loadPosts(targetPostsDOM, targetPaginationDOM, username, following, page);
+  }
+  function nextPage() {
+    page++;
+    if (page > pageTotal) page = pageTotal;
+    loadPosts(targetPostsDOM, targetPaginationDOM, username, following, page);
+  }
+  function linkPage(page) {
+    loadPosts(targetPostsDOM, targetPaginationDOM, username, following, page);
+  }
 }
+
+// /**
+//  * Pagination builder
+//  * @param {*} navDOM
+//  * @param {*} paginationObj
+//  */
+// function paginationBuilder(navDOM, paginationObj) {
+//   const {
+//     page,
+//     page_total: pageTotal,
+//     has_next: hasNext,
+//     has_previous: hasPrevious,
+//   } = paginationObj;
+
+//   let pageButtonsHTML = '';
+//   for (let i = 1; i <= pageTotal; i++) {
+//     pageButtonsHTML += `<li class="page-item ${
+//       i == page ? 'active' : ''
+//     }"><a class="page-link">${i}</a></li>`;
+//   }
+
+//   const paginatorHTML =
+//     `
+//   <li class="page-item ${
+//     hasPrevious ? '' : 'disabled'
+//   }"><a class="page-link">Previous</a></li>` +
+//     pageButtonsHTML +
+//     `<li class="page-item ${
+//       hasNext ? '' : 'disabled'
+//     }"><a class="page-link">Next</a></li>
+//   `;
+//   navDOM.innerHTML = paginatorHTML;
+
+//   // add event handles
+//   const previousPage = () => {}
+// }
 
 function $(selector) {
   try {

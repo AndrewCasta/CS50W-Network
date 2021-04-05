@@ -61,6 +61,6 @@
     </nav>
 
     <div class="body">{% block body %} {% endblock %}</div>
-    {{ request.user.id|json_script:"user_id" }}
+    {{ request.user.username|json_script:"username" }}
   </body>
 </html>

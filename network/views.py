@@ -2,6 +2,7 @@ import json
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.core import serializers
+from django.core.paginator import Paginator
 from django.db import IntegrityError
 from network.models import User, Post, Follow, Like
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
@@ -35,6 +36,7 @@ def posts(request):
 
         username = request.GET["username"]
         following = request.GET["following"]
+        page = request.GET.get("page", 1)
 
         if following:
             user_following = User.objects.get(username=following)
@@ -57,17 +59,28 @@ def posts(request):
         else:
             posts = Post.objects.all().order_by("-datetime")
 
+        paginator = Paginator(posts, 10)
+        posts_page = paginator.get_page(page)
+
         return JsonResponse(
-            [
-                {
-                    "id": post.id,
-                    "username": post.user.username,
-                    "post": post.post,
-                    "datetime": post.datetime.strftime("%b %w, %Y - %I:%M%p"),
-                    "likes": post.likes.count(),
-                }
-                for post in posts
-            ],
+            {
+                "pagination": {
+                    "page": int(page),
+                    "page_total": paginator.num_pages,
+                    "has_next": posts_page.has_next(),
+                    "has_previous": posts_page.has_previous(),
+                },
+                "posts": [
+                    {
+                        "id": post.id,
+                        "username": post.user.username,
+                        "post": post.post,
+                        "datetime": post.datetime.strftime("%b %w, %Y - %I:%M%p"),
+                        "likes": post.likes.count(),
+                    }
+                    for post in posts_page
+                ],
+            },
             safe=False,
         )
 
