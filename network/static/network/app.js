@@ -7,7 +7,8 @@ console.log(authUsername);
 // DOM sections
 const allPostsDOM = document.querySelector('#all-posts');
 const profileDOM = document.querySelector('#profile');
-const followingeDOM = document.querySelector('#following-posts');
+const followingeDOM = document.querySelector('#following');
+const followingePostsDOM = document.querySelector('#following-posts');
 const postsDOM = document.querySelector('.posts');
 const profilPostsDOM = document.querySelector('#profile-posts');
 
@@ -67,7 +68,7 @@ if (followingNav) {
 
 function loadFollowingPage() {
   const username = followingNav.dataset.username;
-  loadPosts(followingeDOM, followingPostsPageNav, undefined, username);
+  loadPosts(followingePostsDOM, followingPostsPageNav, undefined, username);
 
   changeDOM(followingeDOM);
 }
