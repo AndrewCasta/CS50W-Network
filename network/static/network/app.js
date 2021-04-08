@@ -189,9 +189,10 @@ async function loadPosts(
             <p>${datetime}</p>
             <span data-postid="${id}" class="like-button ${
         liked ? 'liked' : 'not-liked'
-      }">${
+      }">
+      <span class="like-icon">${
         liked ? '&#x2764' : '&#x1f494'
-      } <span class="like-count">${likes}</span></span>
+      }</span><span class="like-count">${likes}</span></span>
             ${username === authUsername ? editLink : ''}
             </div>`;
     })
@@ -208,17 +209,19 @@ async function loadPosts(
 
   // like button update liked status for user & add handler
   document.querySelectorAll('.like-button').forEach(likeButton => {
-    likeButton.addEventListener('click', e => {
-      let liked = e.currentTarget.classList.contains('liked');
-      let likeCounter = parseInt(
-        e.currentTarget.querySelector('.like-count').textContent
-      );
-      if (liked) likeCounter += 1;
-      if (!liked && liked > 0) likeCounter -= 1;
-      console.log(likeCounter);
+    likeButton.addEventListener('click', async e => {
+      const postId = e.currentTarget.dataset.postid;
+      const likeCountDOM = e.currentTarget.querySelector('.like-count');
+      const likeIcon = e.currentTarget.querySelector('.like-icon');
 
-      // toggle server side
-      // update dom element
+      const response = await fetch(`like/${postId}`, {
+        method: 'POST',
+      });
+      const data = await response.json();
+      const { like, like_count: likeCount } = data;
+
+      likeCountDOM.innerHTML = likeCount;
+      likeIcon.innerHTML = like ? '&#x2764' : '&#x1f494';
     });
   });
 

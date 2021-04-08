@@ -98,7 +98,9 @@ def posts(request):
                         "post": post.post,
                         "datetime": post.datetime.strftime("%b %w, %Y - %I:%M%p"),
                         "likes": post.likes.count(),
-                        "user_liked": bool(post.likes.filter(user=request.user)),
+                        "user_liked": bool(post.likes.filter(user=request.user))
+                        if request.user.is_authenticated
+                        else False,
                     }
                     for post in posts_page
                 ],
@@ -172,7 +174,7 @@ def follow(request, follow_username):
 @csrf_exempt
 def like(request, post_id):
 
-    if request.method == "GET":
+    if request.method == "POST":
 
         user = request.user
         post = Post.objects.get(pk=post_id)
