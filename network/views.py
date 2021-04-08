@@ -169,6 +169,35 @@ def follow(request, follow_username):
         )
 
 
+@csrf_exempt
+def like(request, post_id):
+
+    if request.method == "GET":
+
+        user = request.user
+        post = Post.objects.get(pk=post_id)
+
+        like_check = user.liked_by.filter(post=post)
+
+        if like_check:
+            like_check.delete()
+            message = f"{user.username} unliked post id: {post.id}"
+
+        else:
+            Like(user=user, post=post).save()
+            message = f"{user.username} liked post id: {post.id}"
+
+        like_check = user.liked_by.filter(post=post)
+
+        return JsonResponse(
+            {
+                "message": message,
+                "like": bool(Like.objects.filter(post__id=post_id)),
+                "like_count": post.likes.count(),
+            }
+        )
+
+
 def login_view(request):
     if request.method == "POST":
 
