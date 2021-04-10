@@ -55,8 +55,8 @@ def edit_post(request, post_id):
 def posts(request):
     if request.method == "GET":
 
-        username = request.GET["username"]
-        following = request.GET["following"]
+        username = request.GET.get("username", False)
+        following = request.GET.get("following", False)
         # page = request.GET.get("page", 1)
 
         if following:
@@ -88,31 +88,40 @@ def posts(request):
         # posts_page = paginator.get_page(page)
 
         return JsonResponse(
-            [
-                {
-                    "pagination": {
-                        "page": page.number,
-                        "page_total": paginator.num_pages,
-                        "has_next": page.has_next(),
-                        "has_previous": page.has_previous(),
-                    },
-                    "posts": [
-                        {
-                            "id": post.id,
-                            "username": post.user.username,
-                            "post": post.post,
-                            "datetime": post.datetime.strftime("%b %w, %Y - %I:%M%p"),
-                            "likes": post.likes.count(),
-                            "user_liked": bool(post.likes.filter(user=request.user))
-                            if request.user.is_authenticated
-                            else False,
-                        }
-                        for post in page
-                    ],
-                }
-                for page in paginator
-            ],
-            safe=False,
+            {
+                "page_total": paginator.num_pages,
+                "data": [
+                    {
+                        # page
+                        "page": {
+                            "page_number": page.number,
+                            "has_next": page.has_next(),
+                            "has_previous": page.has_previous(),
+                            # post
+                            "posts": [
+                                {
+                                    "id": post.id,
+                                    "username": post.user.username,
+                                    "post": post.post,
+                                    "datetime": post.datetime.strftime(
+                                        "%b %w, %Y - %I:%M%p"
+                                    ),
+                                    "likes": post.likes.count(),
+                                    "user_liked": bool(
+                                        post.likes.filter(user=request.user)
+                                    )
+                                    if request.user.is_authenticated
+                                    else False,
+                                }
+                                for post in page
+                            ],
+                            # end post
+                        },
+                        # end page
+                    }
+                    for page in paginator
+                ],
+            },
         )
 
 
