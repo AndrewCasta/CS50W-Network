@@ -25,7 +25,7 @@ const followingPostsPageNav = document.querySelector('#following-page-nav');
 const profilePostsPageNav = document.querySelector('#profile-page-nav');
 
 // Initial page state
-loadPosts(postsDOM, allPostsPageNav);
+// loadPosts(postsDOM, allPostsPageNav);
 changeDOM(allPostsDOM);
 
 // =========
@@ -36,7 +36,7 @@ const addPostButton = document.querySelector('#addPost');
 
 allPostsNav.addEventListener('click', e => {
   e.preventDefault();
-  loadPosts(postsDOM, allPostsPageNav);
+  // loadPosts(postsDOM, allPostsPageNav);
   changeDOM(allPostsDOM, profileDOM);
 });
 
@@ -51,7 +51,7 @@ if (addPostButton) {
       }),
     });
     post.value = '';
-    loadPosts(postsDOM, allPostsPageNav);
+    // loadPosts(postsDOM, allPostsPageNav);
   });
 }
 
@@ -68,7 +68,7 @@ if (followingNav) {
 
 function loadFollowingPage() {
   const username = followingNav.dataset.username;
-  loadPosts(followingePostsDOM, followingPostsPageNav, undefined, username);
+  // loadPosts(followingePostsDOM, followingPostsPageNav, undefined, username);
 
   changeDOM(followingeDOM);
 }
@@ -113,17 +113,12 @@ async function loadProfilePage(username) {
   // check and update follow button
   if (followButton) {
     followButton.dataset.username = username;
-    isSelf
-      ? (followButton.style.display = 'none')
-      : (followButton.style.display = 'block');
-
-    isFollowing
-      ? (followButton.innerHTML = 'Unfollow')
-      : (followButton.innerHTML = 'Follow');
+    followButton.style.display = isSelf ? 'none' : 'block';
+    followButton.innerHTML = isFollowing ? 'Unfollow' : 'Follow';
   }
 
   // add their posts
-  loadPosts(profilPostsDOM, profilePostsPageNav, username);
+  // loadPosts(profilPostsDOM, profilePostsPageNav, username);
 
   // Swap the DOM
   changeDOM(profileDOM);
@@ -134,10 +129,7 @@ async function clickHandlerFollowButton(username) {
     method: 'POST',
   });
   const data = await reponse.json();
-  data.following
-    ? (followButton.innerHTML = 'Unfollow')
-    : (followButton.innerHTML = 'Follow');
-  document.querySelector('#profile-followers').innerHTML = data.followers_count;
+  followButton.innerHTML = data.following ? 'Unfollow' : 'Follow';
 }
 
 // ============
@@ -155,12 +147,29 @@ function changeDOM(onDOM) {
   onDOM.style.display = 'block';
 }
 
-/**
- *
- * @param {*} targetDOM - DOM node to load the posts html
- * @param {*} username - optional arg to load specific user's posts
- * @param {*} following - optional arg to load specific posts user is following
- */
+function $(selector) {
+  try {
+    return document.querySelector(selector);
+  } catch (error) {
+    console.log(`Cannot find ${selector}`);
+  }
+}
+
+// Add these parameters to the state
+// all posts, page
+// profile posts, page
+// following posts, page
+
+// Init app
+// change state and re-apply function
+
+// tackle each function seperately
+
+// fetch
+// render
+// change state
+// event handlers
+
 async function loadPosts(
   targetPostsDOM,
   targetPaginationDOM,
@@ -312,13 +321,5 @@ async function loadPosts(
   }
   function linkPage(page) {
     loadPosts(targetPostsDOM, targetPaginationDOM, username, following, page);
-  }
-}
-
-function $(selector) {
-  try {
-    return document.querySelector(selector);
-  } catch (error) {
-    console.log(`Cannot find ${selector}`);
   }
 }
