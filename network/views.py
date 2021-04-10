@@ -97,26 +97,24 @@ def posts(request):
                             "page_number": page.number,
                             "has_next": page.has_next(),
                             "has_previous": page.has_previous(),
-                            # post
-                            "posts": [
-                                {
-                                    "id": post.id,
-                                    "username": post.user.username,
-                                    "post": post.post,
-                                    "datetime": post.datetime.strftime(
-                                        "%b %w, %Y - %I:%M%p"
-                                    ),
-                                    "likes": post.likes.count(),
-                                    "user_liked": bool(
-                                        post.likes.filter(user=request.user)
-                                    )
-                                    if request.user.is_authenticated
-                                    else False,
-                                }
-                                for post in page
-                            ],
-                            # end post
                         },
+                        # post
+                        "posts": [
+                            {
+                                "id": post.id,
+                                "username": post.user.username,
+                                "post": post.post,
+                                "datetime": post.datetime.strftime(
+                                    "%b %w, %Y - %I:%M%p"
+                                ),
+                                "likes": post.likes.count(),
+                                "user_liked": bool(post.likes.filter(user=request.user))
+                                if request.user.is_authenticated
+                                else False,
+                            }
+                            for post in page
+                        ],
+                        # end post
                         # end page
                     }
                     for page in paginator
@@ -210,7 +208,7 @@ def like(request, post_id):
         return JsonResponse(
             {
                 "message": message,
-                "like": bool(Like.objects.filter(post__id=post_id)),
+                "like": bool(like_check),
                 "like_count": post.likes.count(),
             }
         )
