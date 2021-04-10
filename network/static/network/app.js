@@ -52,10 +52,16 @@ async function init() {
 
 const addPostButton = $('#addPost');
 
-allPostsNav.addEventListener('click', e => {
+allPostsNav.addEventListener('click', async e => {
   e.preventDefault();
-  // loadPosts(postsDOM, allPostsPageNav);
-  changeDOM(allPostsDOM, profileDOM);
+  // fetch all posts
+  allPosts = await fetchPosts();
+  // render all posts, current page
+  renderPosts(allPosts, allPostsDOM);
+  // render all posts paginator
+  renderPaginator(allPosts, allPostsDOM, allPostsPageNav);
+  // turn the all posts page on and others off
+  changeDOM(allPostsPageDOM);
 });
 
 if (addPostButton) {
@@ -84,11 +90,15 @@ if (followingNav) {
   });
 }
 
-function loadFollowingPage() {
-  const username = followingNav.dataset.username;
-  // loadPosts(followingePostsDOM, followingPostsPageNav, undefined, username);
-
-  changeDOM(followingeDOM);
+async function loadFollowingPage() {
+  // fetch all posts
+  followingPosts = await fetchPosts({ following: authUsername });
+  // render all posts, current page
+  renderPosts(followingPosts, followingePostsDOM);
+  // render all posts paginator
+  renderPaginator(followingPosts, followingePostsDOM, followingPostsPageNav);
+  // turn the all posts page on and others off;
+  changeDOM(followingePageDOM);
 }
 
 // ============
