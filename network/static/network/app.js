@@ -22,7 +22,7 @@ const profilePostsPageNav = $('#profile-page-nav');
 
 let allPosts;
 let profilePosts;
-let profileUser;
+let profileUserInfo;
 let followingPosts;
 let pageNum = 1;
 
@@ -112,28 +112,33 @@ if (profileNav) {
   });
 }
 
-// set-up follow button
-const followButton = $('#profile-follow');
-if (followButton) {
-  followButton.addEventListener('click', e => {
-    clickHandlerFollowButton(e.currentTarget.dataset.username);
-  });
+async function loadProfilePage(username) {
+  profilePosts = await fetchPosts({ username: username });
+  profileUserInfo = await fetchProfileInfo(username);
+
+  renderProfileInfo(profileUserInfo);
+  renderPosts(profilePosts, profilPostsDOM);
+  renderPaginator(profilePosts, profilPostsDOM, profilePostsPageNav);
+  changeDOM(profilePageDOM);
 }
 
-async function loadProfilePage(username) {
-  // fetch the profile data
+async function fetchProfileInfo(username) {
   const response = await fetch(`/profile/${username}`);
-  const data = await response.json();
+  data = await response.json();
+  return data;
+}
 
+function renderProfileInfo(profileUserInfo) {
+  // profile loading
   let {
+    username,
     followers_count: followersCount,
     following_count: followingCount,
     is_self: isSelf,
     is_following: isFollowing,
-  } = data;
+  } = profileUserInfo;
 
   // fill in the basic user profile info
-  $('#profile-username').innerHTML = username;
   $('#profile-username').innerHTML = username;
   $('#profile-followers').innerHTML = followersCount;
   $('#profile-following').innerHTML = followingCount;
@@ -144,12 +149,14 @@ async function loadProfilePage(username) {
     followButton.style.display = isSelf ? 'none' : 'block';
     followButton.innerHTML = isFollowing ? 'Unfollow' : 'Follow';
   }
+}
 
-  // add their posts
-  // loadPosts(profilPostsDOM, profilePostsPageNav, username);
-
-  // Swap the DOM
-  changeDOM(profileDOM);
+// set-up follow button
+const followButton = $('#profile-follow');
+if (followButton) {
+  followButton.addEventListener('click', e => {
+    clickHandlerFollowButton(e.currentTarget.dataset.username);
+  });
 }
 
 async function clickHandlerFollowButton(username) {
@@ -256,8 +263,7 @@ function renderPosts(postData, postDom) {
 // Post event handlers
 
 function usernameClickHandle(username) {
-  console.log(`${username} profile page clicked`);
-  // loadProfilePage(username);
+  loadProfilePage(username);
 }
 
 async function likeButtonHandler(e) {
@@ -317,7 +323,7 @@ function editButtonHandler(e) {
  * @param {*} paginatorDOM target paginator DOM
  */
 function renderPaginator(postData, postDOM, paginatorDOM) {
-  const pageTotal = allPosts.page_total;
+  const pageTotal = postData.page_total;
   const { has_next: hasNext, has_previous: hasPrevious } = postData.data[
     pageNum - 1
   ].page;
