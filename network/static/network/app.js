@@ -165,6 +165,7 @@ async function clickHandlerFollowButton(username) {
   });
   const data = await reponse.json();
   followButton.innerHTML = data.following ? 'Unfollow' : 'Follow';
+  $('#profile-followers').innerHTML = data.followers_count;
 }
 
 // ============
