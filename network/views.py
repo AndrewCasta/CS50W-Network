@@ -55,9 +55,9 @@ def edit_post(request, post_id):
 def posts(request):
     if request.method == "GET":
 
-        username = request.GET["username"]
-        following = request.GET["following"]
-        page = request.GET.get("page", 1)
+        username = request.GET.get("username", False)
+        following = request.GET.get("following", False)
+        # page = request.GET.get("page", 1)
 
         if following:
             user_following = User.objects.get(username=following)
@@ -81,28 +81,45 @@ def posts(request):
             posts = Post.objects.all().order_by("-datetime")
 
         paginator = Paginator(posts, 10)
-        posts_page = paginator.get_page(page)
+        # page_total = paginator.num_pages
+
+        print([page.number for page in paginator])
+
+        # posts_page = paginator.get_page(page)
 
         return JsonResponse(
             {
-                "pagination": {
-                    "page": int(page),
-                    "page_total": paginator.num_pages,
-                    "has_next": posts_page.has_next(),
-                    "has_previous": posts_page.has_previous(),
-                },
-                "posts": [
+                "page_total": paginator.num_pages,
+                "data": [
                     {
-                        "id": post.id,
-                        "username": post.user.username,
-                        "post": post.post,
-                        "datetime": post.datetime.strftime("%b %w, %Y - %I:%M%p"),
-                        "likes": post.likes.count(),
+                        # page
+                        "page": {
+                            "page_number": page.number,
+                            "has_next": page.has_next(),
+                            "has_previous": page.has_previous(),
+                        },
+                        # post
+                        "posts": [
+                            {
+                                "id": post.id,
+                                "username": post.user.username,
+                                "post": post.post,
+                                "datetime": post.datetime.strftime(
+                                    "%b %w, %Y - %I:%M%p"
+                                ),
+                                "likes": post.likes.count(),
+                                "user_liked": bool(post.likes.filter(user=request.user))
+                                if request.user.is_authenticated
+                                else False,
+                            }
+                            for post in page
+                        ],
+                        # end post
+                        # end page
                     }
-                    for post in posts_page
+                    for page in paginator
                 ],
             },
-            safe=False,
         )
 
 
@@ -164,6 +181,35 @@ def follow(request, follow_username):
                 "message": message,
                 "following": bool(follow_check),
                 "followers_count": follow.follower.count(),
+            }
+        )
+
+
+@csrf_exempt
+def like(request, post_id):
+
+    if request.method == "POST":
+
+        user = request.user
+        post = Post.objects.get(pk=post_id)
+
+        like_check = user.liked_by.filter(post=post)
+
+        if like_check:
+            like_check.delete()
+            message = f"{user.username} unliked post id: {post.id}"
+
+        else:
+            Like(user=user, post=post).save()
+            message = f"{user.username} liked post id: {post.id}"
+
+        like_check = user.liked_by.filter(post=post)
+
+        return JsonResponse(
+            {
+                "message": message,
+                "like": bool(like_check),
+                "like_count": post.likes.count(),
             }
         )
 

@@ -1,7 +1,6 @@
 {% extends "network/layout.html" %}
 <!--  -->
 {% block body %}
-
 <div id="all-posts">
   <!-- New Post -->
   {% if user.is_authenticated %}
@@ -28,17 +27,7 @@
   <div class="posts"></div>
   <!-- paginator -->
   <nav>
-    <ul id="posts-page-nav" class="pagination justify-content-center">
-      <li class="page-item disabled">
-        <a class="page-link">Previous</a>
-      </li>
-      <li class="page-item active"><a class="page-link">1</a></li>
-      <li class="page-item"><a class="page-link">2</a></li>
-      <li class="page-item"><a class="page-link">3</a></li>
-      <li class="page-item">
-        <a class="page-link">Next</a>
-      </li>
-    </ul>
+    <ul id="posts-page-nav" class="pagination justify-content-center"></ul>
   </nav>
 </div>
 
@@ -47,17 +36,7 @@
   <div id="following-posts" class="following"></div>
   <!-- paginator -->
   <nav>
-    <ul id="following-page-nav" class="pagination justify-content-center">
-      <li class="page-item disabled">
-        <a class="page-link">Previous</a>
-      </li>
-      <li class="page-item active"><a class="page-link">1</a></li>
-      <li class="page-item"><a class="page-link">2</a></li>
-      <li class="page-item"><a class="page-link">3</a></li>
-      <li class="page-item">
-        <a class="page-link">Next</a>
-      </li>
-    </ul>
+    <ul id="following-page-nav" class="pagination justify-content-center"></ul>
   </nav>
 </div>
 
@@ -72,17 +51,7 @@
   <div id="profile-posts"></div>
   <!-- paginator -->
   <nav>
-    <ul id="profile-page-nav" class="pagination justify-content-center">
-      <li class="page-item disabled">
-        <a class="page-link">Previous</a>
-      </li>
-      <li class="page-item active"><a class="page-link">1</a></li>
-      <li class="page-item"><a class="page-link">2</a></li>
-      <li class="page-item"><a class="page-link">3</a></li>
-      <li class="page-item">
-        <a class="page-link">Next</a>
-      </li>
-    </ul>
+    <ul id="profile-page-nav" class="pagination justify-content-center"></ul>
   </nav>
 </div>
 
